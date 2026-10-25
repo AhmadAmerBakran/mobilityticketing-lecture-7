@@ -2,7 +2,7 @@
 
 The source data lives in lab07.routes, lab07.trips and lab07.bookings. Published plans have a separate header table and one detail row per displayed route. A published detail stores the route name, trip count and next departure rather than referring back to values that can change.
 
-\`\`\`text
+```text
 routes + trips -> LiveRouteOverviewQuery -> departure board
                               |
                               v
@@ -13,7 +13,7 @@ bookings <- BookTripCommand -> locked trip
 trips    <- CancelTripCommand -> locked trip
 routes   <- RenameRouteCommand
 published_plans + published_plan_routes -> PublishedSnapshotQuery
-\`\`\`
+```
 
 ## Decision
 
