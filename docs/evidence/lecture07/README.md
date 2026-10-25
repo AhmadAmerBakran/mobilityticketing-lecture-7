@@ -13,7 +13,7 @@ docker compose run --rm app baseline
 docker compose run --rm app overview
 ```
 
-The baseline loads routes and uses lazy loading for trips. With four routes it executes five reads; with 200 routes it executes 201. The projected board executes one read, with no Route or Trip objects materialized. These are the expected properties of the queries, not independently captured measurements. The workflow runs the comparison and uploads the SQL files as an artifact. Actual counts should be copied from those runs rather than estimated.
+The baseline loads routes and uses lazy loading for trips. With four routes it executes five reads; with 200 routes it executes 201. The projected board executes one read, with no Route or Trip objects materialized. These counts were verified against PostgreSQL. The complete [measured results](measurements.md) include links to the actual SQL statements, parameters and output files retained by the workflow.
 
 The small fixture should produce City Loop with two trips at 06:00 and Campus Line with two at 06:10. After publishing morning, cancelling T102 and renaming R1 to City Ring, the live board should show City Ring with one trip at 06:20. The original publication should still show City Loop with two at 06:00. A fresh booking of T102 must be rejected.
 

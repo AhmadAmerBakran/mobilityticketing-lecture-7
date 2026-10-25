@@ -56,6 +56,6 @@ docker compose run --rm app baseline
 docker compose run --rm app overview
 ```
 
-The application writes SQL and result logs to docs/evidence/lecture07/logs. The [measurement notes](docs/evidence/lecture07/README.md) describe what to compare. The GitHub workflow runs the test suites and captures query logs.
+The application writes SQL and result logs to docs/evidence/lecture07/logs. The [measurement results](docs/evidence/lecture07/measurements.md) record the actual read counts, loaded entities and SQL for both fixture sizes. The GitHub workflow also runs the test suites and saves those logs in the repository.
 
 Stop the environment with docker compose stop.
