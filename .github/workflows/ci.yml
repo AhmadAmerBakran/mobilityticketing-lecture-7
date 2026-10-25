@@ -5,6 +5,9 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -31,6 +34,16 @@ jobs:
           docker compose run --rm app baseline > docs/evidence/lecture07/logs/large-baseline.txt
           docker compose run --rm app overview > docs/evidence/lecture07/logs/large-live.txt
           grep -Eh '"(ExecutedReadCommands|MaterializedRoutes|MaterializedTrips)":' docs/evidence/lecture07/logs/*-baseline.txt docs/evidence/lecture07/logs/*-live.txt
+      - name: Summarize measured queries
+        run: python3 scripts/summarize_evidence.py
+      - name: Save query evidence
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/evidence/lecture07/
+          git commit -m "Record query measurements and SQL logs"
+          git push
       - name: Upload query evidence
         if: always()
         uses: actions/upload-artifact@v4
