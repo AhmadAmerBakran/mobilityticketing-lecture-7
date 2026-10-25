@@ -1,12 +1,43 @@
-name: Starter smoke checks
-on: [push, pull_request, workflow_dispatch]
+name: Lecture 7 checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
 jobs:
-  starter:
+  verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - run: docker compose up -d --wait postgres
-      - run: docker compose build app tests
-      - run: docker compose run --rm tests --filter Category=Starter
-      - if: always()
-        run: docker compose down
+      - name: Start database
+        run: docker compose up -d --wait postgres
+      - name: Build app and tests
+        run: docker compose build app tests
+      - name: Starter checks
+        run: docker compose run --rm tests --filter Category=Starter
+      - name: Acceptance checks
+        run: docker compose run --rm tests --filter Category=Acceptance
+      - name: Student tests
+        run: docker compose run --rm tests --filter Category=Student
+      - name: Capture SQL and query counts
+        run: |
+          docker compose run --rm app reset
+          docker compose run --rm app baseline > docs/evidence/lecture07/logs/small-baseline.txt
+          docker compose run --rm app overview > docs/evidence/lecture07/logs/small-live.txt
+          docker compose run --rm app reset
+          docker compose run --rm app scale
+          docker compose run --rm app baseline > docs/evidence/lecture07/logs/large-baseline.txt
+          docker compose run --rm app overview > docs/evidence/lecture07/logs/large-live.txt
+          grep -Eh '"(ExecutedReadCommands|MaterializedRoutes|MaterializedTrips)":' docs/evidence/lecture07/logs/*-baseline.txt docs/evidence/lecture07/logs/*-live.txt
+      - name: Upload query evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lecture07-query-logs
+          path: docs/evidence/lecture07/logs/
+          if-no-files-found: warn
+      - name: Stop database
+        if: always()
+        run: docker compose down -v

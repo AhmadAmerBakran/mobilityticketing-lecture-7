@@ -1,60 +1,61 @@
-# MobilityTicketing: Lecture 7 starter
+# MobilityTicketing lecture 7
 
-Build a live departure board, saved dispatch plans and booking operations. The [application contract](docs/contract.md) defines the required behavior.
+This lab implements a live route board, booking commands and published dispatch plans in .NET 8 with EF Core and PostgreSQL 17. The board reads current route and trip data. Published plans keep a copy of every value shown at publication time, so later cancellations and renames do not alter them.
 
-You need Docker Desktop with Compose. Run these commands from this directory:
+The application contract is in [docs/contract.md](docs/contract.md). The data access decision and transaction boundaries are described in [docs/design.md](docs/design.md).
 
-```sh
+## Running the lab
+
+Docker Desktop with Compose is required. From the repository directory, start PostgreSQL and build the application.
+
+\`\`\`sh
 docker compose up -d --wait postgres
 docker compose build app tests
 docker compose run --rm app reset
-docker compose run --rm app baseline
-docker compose run --rm tests --filter Category=Starter
-```
-
-The fixture contains four routes and nine trips. The default window is 23 October 2026, 06:00 to 07:00 UTC. `baseline` uses lazy loading and saves its SQL and results in `docs/evidence/lecture07/logs/`.
-
-Implement the six methods in `StudentApplication.cs`, and put your snapshot schema in `database/postgres/lecture07/03-read-model.sql`. Use your own command and query classes. The [contract](docs/contract.md) defines the required behavior. Keep your design note in `docs/design.md` and your measurements in `docs/evidence/lecture07/README.md`.
-
-After editing code or SQL, rebuild with `docker compose build app tests`. Run `reset` to apply schema changes. It recreates `lab07` and clears bookings and published plans. Tests reset their own database, `mobility_l07_test`.
-
-Once implemented, try this sequence. The initial reset makes it repeatable:
-
-```sh
-docker compose run --rm app reset
 docker compose run --rm app overview
+\`\`\`
+
+The fixture uses 23 October 2026 and the default window 06:00 to 07:00 UTC. It contains four routes and nine trips. The following commands demonstrate booking retries and the difference between a live board and a saved plan.
+
+\`\`\`sh
 docker compose run --rm app publish morning
 docker compose run --rm app book T201 campus-1
 docker compose run --rm app book T201 campus-1
 docker compose run --rm app cancel T102
 docker compose run --rm app rename R1 "City Ring"
-docker compose run --rm app book T102 cancelled-1
 docker compose run --rm app overview
 docker compose run --rm app snapshot morning
 docker compose run --rm app publish revised
 docker compose run --rm app snapshot revised
-```
+\`\`\`
 
-The T201 calls return `Booked` and then `AlreadyBooked`, with the same receipt. Booking T102 returns `Cancelled` with exit code 2. The live board shows the cancellation and new route name. The saved `morning` plan keeps its original values; `revised` records the changes.
+The repeated booking returns its original receipt and does not create another row. The current board shows City Ring with one trip departing at 06:20. The morning plan still shows City Loop with two trips and a 06:00 departure. A new booking for cancelled T102 is rejected.
 
-Compare the reads with more data:
+A plan can be published for another window by supplying both timestamps:
 
-```sh
+\`\`\`sh
+docker compose run --rm app publish later 2026-10-23T07:00:00Z 2026-10-23T08:00:00Z
+\`\`\`
+
+Retrying a publication with the same ID and window keeps the first copy. Reusing that ID with different window boundaries produces an error.
+
+## Tests and SQL
+
+\`\`\`sh
+docker compose run --rm tests --filter Category=Starter
+docker compose run --rm tests --filter Category=Acceptance
+docker compose run --rm tests --filter Category=Student
+\`\`\`
+
+Each test resets the separate mobility_l07_test database. After code or schema changes, rebuild the Docker images. The measured baseline and live query can be compared on the large fixture:
+
+\`\`\`sh
 docker compose run --rm app reset
 docker compose run --rm app scale
 docker compose run --rm app baseline
 docker compose run --rm app overview
-```
+\`\`\`
 
-This fixture has 200 routes and 100,000 trips. Keep the SQL logs and record the executed reads and loaded entities for both sizes.
+The application writes SQL and result logs to docs/evidence/lecture07/logs. The [measurement notes](docs/evidence/lecture07/README.md) describe what to compare. The GitHub workflow runs the test suites and captures query logs.
 
-Run the implementation checks and your own tests:
-
-```sh
-docker compose run --rm tests --filter Category=Acceptance
-docker compose run --rm tests --filter Category=Student
-```
-
-The nine Starter checks pass before you begin. Acceptance checks fail until the application is implemented. `StudentTests.cs` starts empty: add at least four tests and check that they actually run.
-
-For startup problems, check `docker compose logs postgres`. Stop the lab with `docker compose stop`.
+Stop the environment with docker compose stop.
