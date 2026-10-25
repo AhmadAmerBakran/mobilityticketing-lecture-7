@@ -41,7 +41,8 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/evidence/lecture07/
+          git add docs/evidence/lecture07/measurements.md
+          git add -f docs/evidence/lecture07/logs/*.sql docs/evidence/lecture07/logs/*.json docs/evidence/lecture07/logs/*.txt
           git commit -m "Record query measurements and SQL logs"
           git push
       - name: Upload query evidence
