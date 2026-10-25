@@ -2,7 +2,7 @@
 
 The CLI writes its measurements and generated SQL into the logs directory. Run both strategies against the original fixture, then reset and load the larger fixture before repeating the comparison.
 
-\`\`\`sh
+```sh
 docker compose run --rm app reset
 docker compose run --rm app baseline
 docker compose run --rm app overview
@@ -11,7 +11,7 @@ docker compose run --rm app reset
 docker compose run --rm app scale
 docker compose run --rm app baseline
 docker compose run --rm app overview
-\`\`\`
+```
 
 The baseline loads routes and uses lazy loading for trips. With four routes it executes five reads; with 200 routes it executes 201. The projected board executes one read, with no Route or Trip objects materialized. These are the expected properties of the queries, not independently captured measurements. The workflow runs the comparison and uploads the SQL files as an artifact. Actual counts should be copied from those runs rather than estimated.
 
