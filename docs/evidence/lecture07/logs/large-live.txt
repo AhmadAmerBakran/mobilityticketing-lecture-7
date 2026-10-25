@@ -1217,4 +1217,4 @@
     }
   ]
 }
-SQL: docs/evidence/lecture07/logs/20261025T1129582966859Z-live-90c22b61.sql
+SQL: docs/evidence/lecture07/logs/20261025T1132247024093Z-live-6eb9e9cb.sql

@@ -41,4 +41,4 @@
     }
   ]
 }
-SQL: docs/evidence/lecture07/logs/20261025T1129467099942Z-live-1c85f69a.sql
+SQL: docs/evidence/lecture07/logs/20261025T1132145439133Z-live-66bca0a7.sql
